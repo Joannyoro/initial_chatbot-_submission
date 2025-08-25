@@ -21,7 +21,3 @@ This project is designed as a fun way for students to learn through **Q&A style 
 
 ---
 
-## 🛠️ Installation & Usage
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/your-username/free-chat-bot.git
