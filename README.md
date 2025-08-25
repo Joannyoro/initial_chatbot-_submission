@@ -17,9 +17,7 @@ This project is designed as a fun way for students to learn through **Q&A style 
 
 ---
 
-## 📸 Preview
-![Chatbot Preview](screenshot.png)  
-*(Replace `screenshot.png` with your actual screenshot)*
+
 
 ---
 
