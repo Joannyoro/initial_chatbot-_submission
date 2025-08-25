@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free Chat Bot</title>
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background-color: #121212;
+        color: #f5f5f5;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+    }
+    h1 {
+        font-size: 3rem;
+        color: #fefefe;
+        margin-bottom: 10px;
+        text-shadow: 0 0 10px #f2f5f5;
+    }
+    #chatContainer {
+        width: 90%;
+        max-width: 900px;
+        height: 80vh;
+        background-color: #1e1e1e;
+        border-radius: 20px;
+        box-shadow: 0 0 20px rgba(3, 3, 3, 0.2);
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+        overflow: hidden;
+    }
+    #messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 10px;
+        font-size: 1.2rem;
+    }
+    .message {
+        margin: 10px 0;
+        padding: 15px 20px;
+        border-radius: 15px;
+        max-width: 75%;
+        line-height: 1.5;
+    }
+    .user {
+        background-color: #faf19f;
+        color: #000;
+        align-self: flex-end;
+        border-bottom-right-radius: 0;
+    }
+    .bot {
+        background-color: #2a2a2a;
+        color: #fff;
+        align-self: flex-start;
+        border-bottom-left-radius: 0;
+    }
+    #inputArea {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+    input {
+        flex: 1;
+        padding: 15px;
+        font-size: 1.2rem;
+        border-radius: 10px;
+        border: none;
+        outline: none;
+        background-color: #2a2a2a;
+        color: #fff;
+    }
+    button {
+        padding: 15px 20px;
+        font-size: 1.2rem;
+        background-color: #00ffc6;
+        color: #000;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    button:hover {
+        background-color: #080808;
+        box-shadow: 0 0 10px #060606;
+    }
+    #aboutBtn {
+        margin-top: 20px;
+        padding: 15px 25px;
+        font-size: 1.3rem;
+        background-color: #ff9800;
+        color: #000;
+        border: none;
+        border-radius: 30px;
+        cursor: pointer;
+        transition: 0.3s;
+        box-shadow: 0 0 15px rgba(255,152,0,0.5);
+    }
+    #aboutBtn:hover {
+        background-color: #e68900;
+        box-shadow: 0 0 20px rgba(255,152,0,0.8);
+    }
+    #aboutContainer {
+        display: none;
+        background-color: #1e1e1e;
+        padding: 20px;
+        border-radius: 15px;
+        margin-top: 20px;
+        max-width: 900px;
+        text-align: left;
+        box-shadow: 0 0 15px rgba(0,255,198,0.2);
+    }
+</style>
+</head>
+<body>
+    
+  <h1>Free Chat Bot</h1>
+
+<div id="chatContainer">
+    <div id="messages"></div>
+    <div id="inputArea">
+        <input type="text" id="userInput" placeholder="Type your question...">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<button id="aboutBtn" onclick="toggleAbout()">About This Chat</button>
+
+<div id="aboutContainer">
+    <h2>About This Chatbot</h2>
+       <p>Here is where students ask simple math questions like addition.
+          Students can also learn simple facts, capital cities, simple science questions 
+          and educational quotes.The bot is not fully automated specific prompts must be asked .</p>
+</div>
+    
+<script>
+  const messages = document.getElementById('messages');  
+  const input = document.getElementById('userInput');
+
+  // Toggle About section
+  function toggleAbout() {
+    const about = document.getElementById('aboutContainer');
+    about.style.display = (about.style.display === "none" || about.style.display === "") ? "block" : "none";
+  }
+
+  // Allow Enter key to send
+  input.addEventListener('keypress', function(event) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      sendMessage();
+    }
+  });
+
+  function sendMessage() {
+    const userText = input.value.trim();
+    if (!userText) return;
+
+    addMessage('You', userText, 'user');
+    respond(userText.toLowerCase());
+    input.value = '';
+  }
+
+  function addMessage(sender, message, className){
+    messages.innerHTML += `<div class="message ${className}"><strong>${sender}:</strong> ${message}</div>`;
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  // Helper function for static Q&A
+  function getStaticResponse(input, qaPairs) {
+    for (const pair of qaPairs) {
+      if (Array.isArray(pair.q)) {
+        if (pair.q.some(q => input.includes(q))) return pair.a;
+      } else {
+        if (input.includes(pair.q)) return pair.a;
+      }
+    }
+    return null;
+  }
+
+  // Main respond function
+  function respond(input) {
+    let response = "Sorry, I didn't understand that. Try to ask something else 😊.";
+
+    // Math evaluation
+    const mathPattern = /^[0-9+\-*/().\s]+$/;
+    if (mathPattern.test(input)) {
+      try {
+        const result = eval(input);
+        response = `The answer is: ${result}`;
+        addMessage('Bot', response, 'bot');
+        return;
+      } catch (e) {}
+    }
+
+    // Simple keyword responses
+    const keywordResponses = [
+      { q: ["hello", "hi"], a: "Hello! How can I help you today?" },
+      { q: "name", a: "I'm a simple chatbot built by JOAN." },
+      { q: "bye", a: "Goodbye! Have a great day!" },
+      { q: "weather", a: "I can't check the weather, but you can use a weather app or website for that." },
+      { q: "time", a: "I don't have access to the current time, but you can check your device's clock." },
+      { q: "joke", a: "Why did the scarecrow win an award? Because he was outstanding in his field!" },
+      { q: "quote", a: "The only limit to our realization of tomorrow is our doubts of today." },
+      { q: "advice", a: "Always be kind and help others whenever you can." },
+      { q: "thank you", a: "You're welcome!" },
+      { q: "how are you", a: "I'm good 😁! How can I help you today?" },
+      { q: ["what is your purpose", "whats your purpose"], a: "I am a simple chatbot created for educational purposes." },
+      { q: "what is your name", a: "I am a simple chatbot created by JOAN NYORO." },
+      { q: "what can you do", a: "I can answer simple questions, help with basic math, and provide information about various topics." },
+      { q: "tell me a joke", a: "Why did the bicycle fall over? Because it was two-tired!" }
+    ];
+
+    // FULL STATIC QA LIST (your capitals + science + facts)
+    const staticQA = [
+      { q: "capital city of kenya", a: "The capital city of Kenya is Nairobi." },
+      { q: "who is the president of kenya", a: "The president of Kenya is William Ruto." },
+      { q: "what is photosynthesis", a: "Photosynthesis is the process by which green plants use sunlight to make food from carbon dioxide and water." },
+      { q: "what is gravity", a: "Gravity is the force that attracts two bodies toward each other, like objects toward the Earth." },
+      { q: "what is the largest animal on earth", a: "The largest animal on Earth is the blue whale." },
+      { q: "what is the smallest country in the world", a: "The smallest country in the world is Vatican City." },
+      { q: "what is the longest river in the world", a: "The longest river in the world is the Nile River." },
+      { q: "what is the tallest mountain in the world", a: "The tallest mountain in the world is Mount Everest." },
+      { q: "what is the fastest land animal", a: "The fastest land animal is the cheetah." },
+      { q: "what is the most spoken language in the world", a: "The most spoken language in the world is English." },
+      { q: "what is an atom", a: "An atom is the smallest unit of ordinary matter that forms a chemical element." },
+      { q: "what is electricity", a: "Electricity is the flow of electric charge, typically through wires, used to power devices." },
+      { q: "what is the solar system", a: "The solar system consists of the Sun and all the objects that orbit around it." },
+      { q: "what is climate change", a: "Climate change refers to long-term changes in temperature and weather patterns, mainly due to human activities." },
+      { q: "what is the water cycle", a: "The water cycle is the continuous movement of water on, above, and below the surface of the Earth." },
+      { q: "what is biodiversity", a: "Biodiversity refers to the variety of life in a particular habitat or ecosystem." },
+      { q: "what is renewable energy", a: "Renewable energy comes from sources that are naturally replenished, like solar, wind, and hydro power." },
+      { q: "what is a galaxy", a: "A galaxy is a massive system of stars, gas, and dust bound together by gravity." },
+      { q: "what is a black hole", a: "A black hole is a region of space where gravity is so strong that nothing, not even light, can escape." },
+      { q: "what is evolution", a: "Evolution is the process by which organisms develop and diversify over time." },
+      { q: "what is a cell", a: "A cell is the basic structural, functional, and biological unit of all living organisms." },
+      { q: "what is an ecosystem", a: "An ecosystem is a community of living organisms interacting with each other and their environment." },
+      { q: "what is pollution", a: "Pollution refers to the introduction of harmful substances into the environment." },
+      { q: "what is recycling", a: "Recycling is the process of converting waste materials into reusable materials." },
+
+      // ✅ Capital cities
+      { q: "what is the capital city of france", a: "The capital city of France is Paris." },
+      { q: "what is the capital city of japan", a: "The capital city of Japan is Tokyo." },
+      { q: "what is the capital city of germany", a: "The capital city of Germany is Berlin." },
+      { q: "what is the capital city of italy", a: "The capital city of Italy is Rome." },
+      { q: "what is the capital city of spain", a: "The capital city of Spain is Madrid." },
+      { q: "what is the capital city of canada", a: "The capital city of Canada is Ottawa." },
+      { q: "what is the capital city of australia", a: "The capital city of Australia is Canberra." },
+      { q: "what is the capital city of india", a: "The capital city of India is New Delhi." },
+      { q: "what is the capital city of china", a: "The capital city of China is Beijing." },
+      { q: "what is the capital city of russia", a: "The capital city of Russia is Moscow." },
+      { q: "what is the capital city of brazil", a: "The capital city of Brazil is Brasília." },
+      { q: "what is the capital city of south africa", a: "Pretoria (administrative), Bloemfontein (judicial), and Cape Town (legislative)." },
+      { q: "what is the capital city of mexico", a: "The capital city of Mexico is Mexico City." },
+      { q: "what is the capital city of egypt", a: "The capital city of Egypt is Cairo." },
+      { q: "what is the capital city of uganda", a: "The capital city of Uganda is Kampala." },
+      { q: "what is the capital city of ghana", a: "The capital city of Ghana is Accra." },
+      { q: "what is the capital city of nigeria", a: "The capital city of Nigeria is Abuja." },
+      { q: "what is the capital city of ethiopia", a: "The capital city of Ethiopia is Addis Ababa." },
+      { q: "what is the capital city of tanzania", a: "The capital city of Tanzania is Dodoma." }
+    ];
+
+    // Try keyword responses
+    let found = getStaticResponse(input, keywordResponses);
+    if (found) response = found;
+    else {
+      // Try static Q&A
+      found = getStaticResponse(input, staticQA);
+      if (found) response = found;
+    }
+
+    addMessage('Bot', response, 'bot');
+  }
+</script>
+
+<footer>
+  © 2025 教育机器人. All rights reserved.
+  Created by JOAN NYORO
+</footer>
+</body>
+</html>
